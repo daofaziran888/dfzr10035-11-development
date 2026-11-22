@@ -61,6 +61,7 @@ npm run dev
 | 重放队列 | `retry_queue` | 重放任务 | 任务编号、失败端点、失败原因 |
 | 数据投递 | `data_delivery` | 投递管道 | 管道编号、数据来源、目标地址 |
 | 订阅管理 | `subscriber` | 订阅方 | 订阅编号、订阅方、数据主题 |
+| 消费回执 | `consume_receipt` | 消费回执 | 回执编号、归属订阅、数据主题 |
 | 接口监控 | `api_monitor` | 监控指标 | 指标编号、目标端点、监控类型 |
 | Webhook路由 | `webhook_router` | 回调规则 | 规则编号、触发事件、目标URL |
 | 传输加密 | `data_encrypt` | 加密配置 | 配置编号、数据范围、加密算法 |
@@ -80,6 +81,25 @@ npm run dev
   `frontend/src/domain/<模块>.ts`，用于承载真实业务差异并维持36题位容量。
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
+
+## 订阅归属与补发
+
+订阅管理在通用资源路由之外提供一组订阅身份维度的归属接口
+（`backend/app/routers/subscriber_ops.py`，前缀 `/api/subscriber`）：
+
+| 接口 | 说明 |
+| --- | --- |
+| `POST /api/subscriber/{id}/receive` | 按订阅身份领取主题下的数据版本，生成归属该订阅的消费回执 |
+| `POST /api/subscriber/{id}/receipts/{rid}/sign` | 签收回执；归属只认订阅身份，旧地址迟到回执仍归原订阅 |
+| `POST /api/subscriber/{id}/change-address` | 更换接收地址；历史已确认消费仍归原订阅，回执地址保持签收时快照 |
+| `GET /api/subscriber/{id}/consumption` | 按归属过滤的消费明细（含版本批次），同主题其他订阅只计数不并入 |
+| `POST /api/subscriber/{id}/receipts/{rid}/redeliver` | 凭归属消费凭据生成补发记录，归属判定同步重放队列（补发待办） |
+| `GET /api/subscriber/{id}/redelivery-todos` | 该订阅的补发待办，携带新地址与原回执的关系 |
+| `POST /api/subscriber/{id}/redelivery/{tid}/confirm` | 接收方确认补发，原回执标记已补发 |
+
+归属规则：主题相同不能替代订阅身份；一笔交付只关联一条接收记录；
+消费回执台账（`consume_receipt`）只读，不允许手工登记或直接动作。
+场景验证：`cd backend && .venv/bin/python tests/test_subscriber_ownership.py`。
 
 领域：数据工程
 子方向：数据采集、爬虫与RPA

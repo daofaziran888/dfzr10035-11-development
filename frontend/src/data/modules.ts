@@ -124,6 +124,17 @@ export const MODULES: ModuleMeta[] = [
     metrics: ["订阅总数", "推送中订阅", "已停订订阅"],
   },
   {
+    key: "consume_receipt",
+    name: "消费回执",
+    entity: "消费回执",
+    desc: "按订阅归属记录主题消费回执与数据版本批次的关联明细：一笔交付只归属一个订阅，改地址不改历史归属。",
+    fields: ["回执编号", "归属订阅", "数据主题", "版本编号", "接收地址", "签收状态", "归属依据", "领取时间"],
+    statuses: ["待签收", "已签收", "已补发", "已作废"],
+    actions: [],
+    actionTargets: {},
+    metrics: ["回执总数", "已签收回执", "已作废回执"],
+  },
+  {
     key: "api_monitor",
     name: "接口监控",
     entity: "监控指标",

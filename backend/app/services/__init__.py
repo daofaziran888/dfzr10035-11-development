@@ -13,6 +13,7 @@ from app.services.data_cache import DataCacheService
 from app.services.retry_queue import RetryQueueService
 from app.services.data_delivery import DataDeliveryService
 from app.services.subscriber import SubscriberService
+from app.services.consume_receipt import ConsumeReceiptService
 from app.services.api_monitor import ApiMonitorService
 from app.services.webhook_router import WebhookRouterService
 from app.services.data_encrypt import DataEncryptService
@@ -37,6 +38,7 @@ SERVICES: dict[str, BaseModuleService] = {
     "retry_queue": RetryQueueService(),
     "data_delivery": DataDeliveryService(),
     "subscriber": SubscriberService(),
+    "consume_receipt": ConsumeReceiptService(),
     "api_monitor": ApiMonitorService(),
     "webhook_router": WebhookRouterService(),
     "data_encrypt": DataEncryptService(),
